@@ -11,8 +11,10 @@ import { Award } from 'lucide-react'; // Using Award as a placeholder logo icon
 import Link from 'next/link';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
+export default function AppShell({ children, isAuthenticated }: { children: React.ReactNode; isAuthenticated: boolean }) {
   return (
     <div className="flex min-h-screen w-full">
+      {isAuthenticated && (
       <Sidebar collapsible="icon" variant="sidebar">
         <SidebarHeader className="p-3">
           <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center">
@@ -27,6 +29,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </SidebarContent>
         <SidebarRail />
       </Sidebar>
+      )}
       <SidebarInset>
         <div className="flex flex-1 flex-col">
           <AppHeader />

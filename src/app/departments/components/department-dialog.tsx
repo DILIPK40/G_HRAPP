@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import type { Department } from "@/types"
+import { Loader2 } from "lucide-react"
 import React from "react"
 
 const departmentSchema = z.object({
@@ -35,11 +36,13 @@ type DepartmentFormValues = z.infer<typeof departmentSchema>
 
 interface DepartmentDialogProps {
   department?: Department | null;
-  onSave: (department: DepartmentFormValues) => void;
+  onSave: (department: DepartmentFormValues) => Promise<void>; // onSave is now async
   children: React.ReactNode; // For the trigger button
+  isSaving: boolean; // Prop from parent
+  saveError: string | null; // Prop from parent
 }
 
-export function DepartmentDialog({ department, onSave, children }: DepartmentDialogProps) {
+export function DepartmentDialog({ department, onSave, children, isSaving, saveError }: DepartmentDialogProps) {
   const [open, setOpen] = React.useState(false);
   const form = useForm<DepartmentFormValues>({
     resolver: zodResolver(departmentSchema),
@@ -50,6 +53,7 @@ export function DepartmentDialog({ department, onSave, children }: DepartmentDia
   })
 
   React.useEffect(() => {
+    // When the dialog opens or the department prop changes, reset the form
     if (department) {
       form.reset({
         name: department.name,
@@ -61,11 +65,11 @@ export function DepartmentDialog({ department, onSave, children }: DepartmentDia
   }, [department, form, open]);
 
 
-  function onSubmit(data: DepartmentFormValues) {
-    onSave(data);
-    setOpen(false); // Close dialog on save
-    form.reset();
+  async function onSubmit(data: DepartmentFormValues) {
+    await onSave(data);
+    // Parent component's onSave is responsible for closing the dialog and resetting the form on success and handling errors
   }
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -73,7 +77,7 @@ export function DepartmentDialog({ department, onSave, children }: DepartmentDia
         {children}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
+        <DialogHeader className="mb-4">
           <DialogTitle>{department ? "Edit Department" : "Add New Department"}</DialogTitle>
           <DialogDescription>
             {department ? "Make changes to the department details." : "Enter the details for the new department."}
@@ -95,7 +99,7 @@ export function DepartmentDialog({ department, onSave, children }: DepartmentDia
               )}
             />
             <FormField
-              control={form.control}
+ control={form.control}
               name="managerName"
               render={({ field }) => (
                 <FormItem>
@@ -108,16 +112,21 @@ export function DepartmentDialog({ department, onSave, children }: DepartmentDia
               )}
             />
             <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="outline">Cancel</Button>
+ <DialogClose asChild>
+                <Button type="button" variant="outline" disabled={isSaving}>Cancel</Button>
               </DialogClose>
-              <Button type="submit" className="bg-accent text-accent-foreground hover:bg-accent/90">
+              <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSaving}>
+                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {department ? "Save Changes" : "Add Department"}
               </Button>
+
             </DialogFooter>
+ {saveError && <p className="text-sm font-medium text-destructive mt-2">{saveError}</p>}
+
           </form>
         </Form>
       </DialogContent>
     </Dialog>
   )
 }
+

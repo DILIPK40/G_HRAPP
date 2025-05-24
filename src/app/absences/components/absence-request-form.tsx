@@ -22,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { useToast } from "@/hooks/use-toast"
+import { useState } from "react"
 
 const absenceRequestSchema = z.object({
   employeeName: z.string().min(1, "Employee name is required"),
@@ -41,34 +42,68 @@ export type AbsenceRequestFormValues = z.infer<typeof absenceRequestSchema>;
 interface AbsenceRequestFormProps {
   onSubmitSuccess?: (data: AbsenceRequestFormValues) => void;
 }
-
+// Update the type of onSubmitSuccess to just a function that triggers re-fetch,
 export default function AbsenceRequestForm({ onSubmitSuccess }: AbsenceRequestFormProps) {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const form = useForm<AbsenceRequestFormValues>({
     resolver: zodResolver(absenceRequestSchema),
     defaultValues: {
       employeeName: "", // Populate from logged-in user in a real app
       employeeId: "",   // Populate from logged-in user
       reason: "",
+      startDate: new Date(), // Initialize date fields
+      endDate: new Date(),
     },
   })
 
-  function onSubmit(data: AbsenceRequestFormValues) {
-    // Simulate API call
+ async function onSubmit(data: AbsenceRequestFormValues) {
+    setIsSubmitting(true);
+    setSubmitError(null);
+
     console.log(data);
-    toast({
+
+    try {
+      const res = await fetch('/api/absences', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...data,
+          // Format dates to ISO string for the API
+          startDate: data.startDate.toISOString(),
+          endDate: data.endDate.toISOString(),
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Failed to submit absence request.');
+      }
+
+      // Success
+      toast({
       title: "Absence Request Submitted",
       description: `Your request for ${data.type} from ${format(data.startDate, "PPP")} to ${format(data.endDate, "PPP")} has been submitted.`,
-    });
-    form.reset();
-    if (onSubmitSuccess) {
-      onSubmitSuccess(data);
+      });
+      form.reset();
+      if (onSubmitSuccess) {
+        onSubmitSuccess(data); // Call success handler with data
+      }
+    } catch (error: any) {
+      setSubmitError(error.message);
+      toast({ title: "Submission Failed", description: error.message || "An unexpected error occurred.", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 gap-6 p-4 md:p-6 lg:p-8 bg-card rounded-lg shadow-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -221,7 +256,10 @@ export default function AbsenceRequestForm({ onSubmitSuccess }: AbsenceRequestFo
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full md:w-auto bg-accent text-accent-foreground hover:bg-accent/90">
+        {submitError && <p className="text-destructive text-sm">{submitError}</p>}
+        <Button type="submit" className="w-full md:w-auto" disabled={isSubmitting}>
+ {isSubmitting && <span className="mr-2 h-4 w-4 animate-spin" />}
+
           Submit Request
         </Button>
       </form>

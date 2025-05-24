@@ -96,6 +96,8 @@ export const columns: ColumnDef<Employee>[] = [
     cell: ({ row }) => {
       const employee = row.original
       return (
+        // Access onEdit and onDelete from the column definition's meta property
+        // This assumes you will pass these functions to the DataTable component's columns prop
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">

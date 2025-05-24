@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { FormEvent } from 'react';
+import { type FormEvent, useActionState } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,7 +37,7 @@ function SubmitButton() {
 
 export default function LoginForm({ roleName, action, redirectTo }: LoginFormProps) {
   const initialState: LoginFormState = { message: null };
-  const [state, formAction] = useFormState(action, initialState);
+  const [state, formAction] = useActionState(action, initialState);
 
   // In a real app, successful login would redirect via the server action.
   // Here we just show a message if the (placeholder) server action indicates success.
