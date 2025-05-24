@@ -12,4 +12,4 @@ const dbConfig: PoolOptions = {
 
 const pool: Pool = mysql.createPool(dbConfig);
 
-export { pool };
+export default pool;
