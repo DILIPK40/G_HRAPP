@@ -5,6 +5,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { cookies } from 'next/headers';
 import { Toaster } from '@/components/ui/toaster';
 import AppShell from '@/components/app-shell';
+import { verifyAuth } from '@/lib/auth'; // Ensure verifyAuth is imported
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -21,12 +22,13 @@ export const metadata: Metadata = {
   description: 'Modern HR Management Platform',
 };
 
-export default function RootLayout({
+export default function RootLayout({ // RootLayout should be synchronous if verifyAuth is synchronous
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const authenticatedUser = await verifyAuth(cookies());
+  const cookieStore = cookies();
+  const authenticatedUser = verifyAuth(cookieStore); // Call verifyAuth synchronously
   const isAuthenticated = !!authenticatedUser;
 
   return (

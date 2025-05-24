@@ -9,8 +9,8 @@ import AppHeader from '@/components/app-header';
 import MainNav from '@/components/main-nav';
 import { Award } from 'lucide-react'; // Using Award as a placeholder logo icon
 import Link from 'next/link';
+import type React from 'react';
 
-export default function AppShell({ children }: { children: React.ReactNode }) {
 export default function AppShell({ children, isAuthenticated }: { children: React.ReactNode; isAuthenticated: boolean }) {
   return (
     <div className="flex min-h-screen w-full">
