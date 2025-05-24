@@ -1,8 +1,7 @@
 
 'use client';
 
-import { type FormEvent, useActionState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,14 +37,6 @@ function SubmitButton() {
 export default function LoginForm({ roleName, action, redirectTo }: LoginFormProps) {
   const initialState: LoginFormState = { message: null };
   const [state, formAction] = useActionState(action, initialState);
-
-  // In a real app, successful login would redirect via the server action.
-  // Here we just show a message if the (placeholder) server action indicates success.
-  // useEffect(() => {
-  //   if (state.success) {
-  //     // router.push(redirectTo) or server action handles redirect
-  //   }
-  // }, [state.success, redirectTo, router]);
 
   return (
     <Card className="w-full max-w-md mx-auto shadow-xl">
