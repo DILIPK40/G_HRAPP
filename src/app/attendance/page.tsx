@@ -76,7 +76,11 @@ export default function AttendanceManagementPage() {
               <UploadCloud className="mr-2 h-4 w-4" /> Import Data
             </Button>
           </div>
-           <p className="text-xs text-muted-foreground mt-2">Supported formats: CSV, XLSX. Ensure data matches required columns (Employee ID, Date, Check-in, Check-out).</p>
+           <p className="text-xs text-muted-foreground mt-2">
+             Supported formats: CSV, XLSX. <br />
+             Required columns: <strong>EmployeeID</strong> (e.g., EMP001), <strong>Date</strong> (YYYY-MM-DD), <strong>CheckInTime</strong> (HH:MM, 24-hour), <strong>CheckOutTime</strong> (HH:MM, 24-hour).<br />
+             Optional column: <strong>Status</strong> (Present, Absent, Late, Half-Day).
+           </p>
         </CardContent>
       </Card>
       
